@@ -45,7 +45,7 @@ class _LoginState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Login Page"),
+        title: const Text("CPIMS"),
       ),
       body: Form(
         key: _formKey,
