@@ -1,7 +1,9 @@
 // main.dart
 import 'package:flutter/material.dart';
 import 'dart:io'; // for using HttpClient
-import 'dart:convert'; // for using json.decode()
+import 'dart:convert';
+
+import 'api_service.dart'; // for using json.decode()
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +18,7 @@ class MyApp extends StatelessWidget {
       // Hide the debug banner
       debugShowCheckedModeBanner: false,
       title: 'Api request',
-      home: HomePage(),
+      home: LoginPage(),
     );
   }
 }
@@ -32,27 +34,6 @@ class _HomePageState extends State<HomePage> {
   // The list that contains information about photos
   List _loadedPhotos = [];
 
-  // The function that fetches data from the API
-  Future<void> _fetchData() async {
-    const apiUrl = 'https://jsonplaceholder.typicode.com/photos';
-    const helthitApiUrl = 'https://dev.cpims.net/api/';
-
-    HttpClient client = HttpClient();
-    client.autoUncompress = true;
-
-    final HttpClientRequest request = await client.getUrl(Uri.parse(apiUrl));
-    request.headers
-        .set(HttpHeaders.contentTypeHeader, "application/json; charset=UTF-8");
-    final HttpClientResponse response = await request.close();
-
-    final String content = await response.transform(utf8.decoder).join();
-    final List data = json.decode(content);
-
-    setState(() {
-      _loadedPhotos = data;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,7 +44,13 @@ class _HomePageState extends State<HomePage> {
             child: _loadedPhotos.isEmpty
                 ? Center(
               child: ElevatedButton(
-                onPressed: _fetchData,
+                onPressed: () async {
+                  const apiUrl = 'https://jsonplaceholder.typicode.com/photos';
+                  final photos = await ApiService.fetchPhotos(apiUrl);
+                  setState(() {
+                    _loadedPhotos = photos;
+                  });
+                },
                 child: const Text('Load Photos'),
               ),
             )
@@ -89,18 +76,23 @@ class _HomePageState extends State<HomePage> {
 
 
 
+class LoginPage extends StatefulWidget {
+  const LoginPage({Key? key}) : super(key: key);
 
-
-class _LoginState extends State<Login> {
+  @override
+  State<LoginPage> createState() => _LoginState();
+}
+class _LoginState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController emailController = TextEditingController();
+  TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: const Text("Login Page"),
       ),
       body: Form(
         key: _formKey,
@@ -113,12 +105,12 @@ class _LoginState extends State<Login> {
                 padding:
                 const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
                 child: TextFormField(
-                  controller: emailController,
+                  controller: usernameController,
                   decoration: const InputDecoration(
-                      border: OutlineInputBorder(), labelText: "Email"),
+                      border: OutlineInputBorder(), labelText: "UserName"),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
+                      return 'Please enter your username';
                     }
                     return null;
                   },
@@ -145,9 +137,45 @@ class _LoginState extends State<Login> {
                 const EdgeInsets.symmetric(horizontal: 8, vertical: 16.0),
                 child: Center(
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: ()  async {
                       if (_formKey.currentState!.validate()) {
-                        // Navigate the user to the Home page
+                        // if (usernameController.text == "testhealthit" && passwordController.text == "T3st@987654321") {
+
+                          const loginApiUrl = 'https://dev.cpims.net/api/token/'; // Replace with actual endpoint
+                          var username = usernameController.text;
+                          var password = passwordController.text;
+
+                          try {
+                            final loginData = await ApiService.login(loginApiUrl, username, password);
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(loginData.toString()),
+                              ),
+                            );
+
+                            // Navigator.of(BuildContext as BuildContext).pushReplacement(MaterialPageRoute(
+                            //   builder: (context) => HomePage(),
+                            // ));
+                          } catch (e) {
+                            // Handle error
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('An error occurred: $e'),
+                              ),
+                            );
+                          }
+
+
+
+                        // } else {
+                        //   ScaffoldMessenger.of(context).showSnackBar(
+                        //     const SnackBar(
+                        //         content: Text('Invalid Credentials')),
+                        //   );
+                        // }
+
+
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Please fill input')),
