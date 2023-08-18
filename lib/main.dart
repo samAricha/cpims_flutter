@@ -1,5 +1,6 @@
 // main.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_test3/dashboard_screen.dart';
 import 'dart:io'; // for using HttpClient
 import 'dart:convert';
 
@@ -146,17 +147,18 @@ class _LoginState extends State<LoginPage> {
                           var password = passwordController.text;
 
                           try {
-                            final loginData = await ApiService.login(loginApiUrl, username, password);
+                            final apiAccessToken = await ApiService.login(loginApiUrl, username, password);
+
+                            //navigating to home page
+                            Navigator.of(context).pushReplacement(MaterialPageRoute(
+                              builder: (context) => DashboardScreen(accessToken: apiAccessToken),
+                            ));
 
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(loginData.toString()),
+                                content: Text(apiAccessToken.toString()),
                               ),
                             );
-
-                            // Navigator.of(BuildContext as BuildContext).pushReplacement(MaterialPageRoute(
-                            //   builder: (context) => HomePage(),
-                            // ));
                           } catch (e) {
                             // Handle error
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -191,5 +193,24 @@ class _LoginState extends State<LoginPage> {
         ),
       ),
     );
+  }
+}
+
+
+
+void _loadDashboardData() async {
+  try {
+    final token = 'YOUR_BEARER_TOKEN'; // Replace with the actual Bearer token
+    final apiUrl = 'https://dev.cpims.net/api/dashboard'; // Replace with the endpoint B URL
+
+    final dashboardData = await ApiService.fetchDashboardData(apiUrl, token);
+
+    // Display the dashboard data on your landing page
+    // setState(() {
+    //   // Update your state variables to display the dashboard data
+    // });
+  } catch (e) {
+    print('Error fetching dashboard data: $e');
+    // Handle the error as needed
   }
 }
