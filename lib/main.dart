@@ -1,10 +1,8 @@
 // main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test3/dashboard_screen.dart';
-import 'dart:io'; // for using HttpClient
-import 'dart:convert';
 
-import 'api_service.dart'; // for using json.decode()
+import 'api_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,61 +16,13 @@ class MyApp extends StatelessWidget {
     return const MaterialApp(
       // Hide the debug banner
       debugShowCheckedModeBanner: false,
-      title: 'Api request',
+      title: 'HealtthIT CPMIS',
       home: LoginPage(),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
 
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  // The list that contains information about photos
-  List _loadedPhotos = [];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text('Api requests'),
-        ),
-        body: SafeArea(
-            child: _loadedPhotos.isEmpty
-                ? Center(
-              child: ElevatedButton(
-                onPressed: () async {
-                  const apiUrl = 'https://jsonplaceholder.typicode.com/photos';
-                  final photos = await ApiService.fetchPhotos(apiUrl);
-                  setState(() {
-                    _loadedPhotos = photos;
-                  });
-                },
-                child: const Text('Load Photos'),
-              ),
-            )
-            // The ListView that displays photos
-                : ListView.builder(
-              itemCount: _loadedPhotos.length,
-              itemBuilder: (BuildContext ctx, index) {
-                return ListTile(
-                  leading: Image.network(
-                    _loadedPhotos[index]["thumbnailUrl"],
-                    width: 150,
-                    fit: BoxFit.cover,
-                  ),
-                  title: Text(_loadedPhotos[index]['title']),
-                  subtitle:
-                  Text('Photo ID: ${_loadedPhotos[index]["id"]}'),
-                );
-              },
-            )));
-  }
-}
 
 
 
@@ -83,6 +33,8 @@ class LoginPage extends StatefulWidget {
   @override
   State<LoginPage> createState() => _LoginState();
 }
+
+
 class _LoginState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController emailController = TextEditingController();
@@ -101,7 +53,16 @@ class _LoginState extends State<LoginPage> {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+
             children: [
+              const Text(
+                'LOGIN',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               Padding(
                 padding:
                 const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
@@ -140,6 +101,11 @@ class _LoginState extends State<LoginPage> {
                   child: ElevatedButton(
                     onPressed: ()  async {
                       if (_formKey.currentState!.validate()) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(usernameController.text + passwordController.text),
+                          ),
+                        );
                         // if (usernameController.text == "testhealthit" && passwordController.text == "T3st@987654321") {
 
                           const loginApiUrl = 'https://dev.cpims.net/api/token/';
@@ -151,14 +117,14 @@ class _LoginState extends State<LoginPage> {
 
                             //navigating to home page
                             Navigator.of(context).pushReplacement(MaterialPageRoute(
-                              builder: (context) => DashboardScreen(accessToken: apiAccessToken),
+                              builder: (context) => DashboardScreen(accessToken: apiAccessToken.toString()),
                             ));
 
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(apiAccessToken.toString()),
-                              ),
-                            );
+                            // ScaffoldMessenger.of(context).showSnackBar(
+                            //   SnackBar(
+                            //     content: Text(apiAccessToken.toString()),
+                            //   ),
+                            // );
                           } catch (e) {
                             // Handle error
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -170,21 +136,21 @@ class _LoginState extends State<LoginPage> {
 
 
 
-                        // } else {
-                        //   ScaffoldMessenger.of(context).showSnackBar(
-                        //     const SnackBar(
-                        //         content: Text('Invalid Credentials')),
-                        //   );
-                        // }
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Invalid Credentials')),
+                          );
+                        }
 
 
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Please fill input')),
-                        );
-                      }
+                      // } else {
+                      //   ScaffoldMessenger.of(context).showSnackBar(
+                      //     const SnackBar(content: Text('Please fill input')),
+                      //   );
+                      // }
                     },
-                    child: const Text('Submit'),
+                    child: const Text('Login'),
                   ),
                 ),
               ),
@@ -193,24 +159,5 @@ class _LoginState extends State<LoginPage> {
         ),
       ),
     );
-  }
-}
-
-
-
-void _loadDashboardData() async {
-  try {
-    final token = 'YOUR_BEARER_TOKEN'; // Replace with the actual Bearer token
-    final apiUrl = 'https://dev.cpims.net/api/dashboard'; // Replace with the endpoint B URL
-
-    final dashboardData = await ApiService.fetchDashboardData(apiUrl, token);
-
-    // Display the dashboard data on your landing page
-    // setState(() {
-    //   // Update your state variables to display the dashboard data
-    // });
-  } catch (e) {
-    print('Error fetching dashboard data: $e');
-    // Handle the error as needed
   }
 }

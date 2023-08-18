@@ -42,7 +42,7 @@ class ApiService {
     final String content = await response.transform(utf8.decoder).join();
     // print(content);
     final Map<String, dynamic> responseData = json.decode(content);
-    final String access = responseData['access'] ?? '';
+    final String access = responseData['access'];
 
     return access;
   }
