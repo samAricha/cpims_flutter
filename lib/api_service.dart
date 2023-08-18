@@ -23,20 +23,28 @@ class ApiService {
     HttpClient client = HttpClient();
     client.autoUncompress = true;
 
-    final HttpClientRequest request = await client.postUrl(Uri.parse(apiUrl));
+    final HttpClientRequest request = await client.postUrl(Uri.parse("https://dev.cpims.net/api/token/"));
     request.headers
-        .set(HttpHeaders.contentTypeHeader, "application/x-www-form-urlencoded");
+        .set(HttpHeaders.contentTypeHeader, "application/json; charset=UTF-8");
 
-    final String formData = 'username=$username&password=$password';
+    final Map<String, dynamic> requestData = {
+      'username': "testhealthit",
+      'password': "T3st@987654321",
+    };
 
-    request.write(formData);
+    final String jsonData = json.encode(requestData);
+
+    request.headers.set(HttpHeaders.contentLengthHeader, jsonData.length);
+    request.write(jsonData);
 
     final HttpClientResponse response = await request.close();
 
     final String content = await response.transform(utf8.decoder).join();
+    // print(content);
     final Map<String, dynamic> responseData = json.decode(content);
 
     return responseData;
   }
+
 
 }
